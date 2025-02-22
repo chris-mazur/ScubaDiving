@@ -32,25 +32,25 @@ public class MainMenu extends BasicGameState {
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		// background of main menu
-		background = new Image("\\Assets\\MainMenu\\BackgroundMainMenu\\backgroundMainMenu.png");
+		background = new Image("/Assets/MainMenu/BackgroundMainMenu/backgroundMainMenu.png");
 		// music of main menu
-		mainMenuMusic = new Music("\\Assets\\MainMenu\\MainMenuMusic.ogg");
+		mainMenuMusic = new Music("/Assets/MainMenu/MainMenuMusic.ogg");
 		mainMenuMusic.setVolume(0.5f);
 		mainMenuMusic.loop();
 		// sound for start game (initial scene)
-		startGame = new Sound("\\Assets\\MainMenu\\StartGame.ogg");
+		startGame = new Sound("/Assets/MainMenu/StartGame.ogg");
 
 		/*
 		 * set the image arrays needed for the animation of diver
 		 */
-		Image[] iddle = { new Image("Assets\\InitialScene\\SpriteScubaCharacter\\00.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\01.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\02.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\03.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\04.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\05.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\06.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\07.png"), };
+		Image[] iddle = { new Image("Assets/InitialScene/SpriteScubaCharacter/00.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/01.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/02.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/03.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/04.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/05.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/06.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/07.png"), };
 		// diver animation for state iddle
 		diver = new Animation(iddle, ANIMATIONSPEED);
 	}

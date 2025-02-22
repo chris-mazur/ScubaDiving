@@ -19,7 +19,7 @@ public class SplashScreen extends BasicGameState {
 	// init-method for initializing all resources
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		logoImg = new Image("Assets\\SplashScreen\\leonardo-marcao-logo.png");
+		logoImg = new Image("Assets/SplashScreen/leonardo-marcao-logo.png");
 	}
 
 	@Override

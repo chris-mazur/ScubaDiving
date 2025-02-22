@@ -22,6 +22,7 @@ import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Rectangle;
+import physics.Diver;
 
 public class InitialScene extends BasicGameState {
 
@@ -32,7 +33,7 @@ public class InitialScene extends BasicGameState {
 	private float xBubble, yBubble;
 	private float xBackground, yBackground;
 	private static float speedDiver = 0.2f;
-	private static float speedBackground = 0.07f;
+	private static float speedBackground = 0.0f;
 	private static final float BUOYANT_FORCE = 0.05f;
 	private static final int ANIMATION_SPEED_DIVER = 150;
 	private static final int ANIMATION_SPEED_ENEMY = 150;
@@ -53,6 +54,18 @@ public class InitialScene extends BasicGameState {
 	private int diverHealth = 100;
 	private Random ran;
 	private Color collider;
+	private float bcdVolume = 0.0f; // Current BCD volume from 0.0 to 1.0
+	private float targetBcdVolume = 0.0f; // Target BCD volume based on user input
+	private float volumeChangeRate = 0.005f; // Rate of change for BCD volume
+	private float depth = 0.0f; // Current depth of the diver
+	private float ascentSpeed = 0.1f; // Speed of ascent
+	private float descentSpeed = 0.1f; // Speed of descent
+	private float pressureFactor = 0.1f; // Factor to adjust buoyancy based on depth
+
+	private Diver diverPhysics = new Diver(8.0f);
+	private float currentVerticalSpeed = 0.0f; // Current vertical speed of the diver
+	private float deltaTime = 0.0010f; // Assuming 3000 FPS, delta time is approximately 1/60 seconds
+	private float heightWaterAboveDiver = 0.0f; // Height of water above the diver
 
 	// ID we return to class 'Application'
 	public static final int ID = 2;
@@ -63,48 +76,48 @@ public class InitialScene extends BasicGameState {
 		// stop music of main menu
 
 		// load and set initial scene/state sounds
-		coin = new Sound("Assets\\InitialScene\\coin.ogg");
-		gameOver = new Sound("Assets\\GamerOver\\GameOver.ogg");
-		underWater = new Music("Assets\\InitialScene\\UnderWater.ogg");
+		coin = new Sound("Assets/InitialScene/coin.ogg");
+		gameOver = new Sound("Assets/GamerOver/GameOver.ogg");
+		underWater = new Music("Assets/InitialScene/UnderWater.ogg");
 		// underWater.loop();
 		underWater.setVolume(0.3f);
 
 		// set up garbage from the scene as well as your collision body
-		oil = new Image("Assets\\InitialScene\\Garbage\\radioactive.png");
+		oil = new Image("Assets/InitialScene/Garbage/radioactive.png");
 		banRect = new Rectangle(xOil, yOil, oil.getWidth(), oil.getHeight());
-		radioActive = new Image("Assets\\InitialScene\\Garbage\\bottle.png");
+		radioActive = new Image("Assets/InitialScene/Garbage/bottle.png");
 		radioActiveRect = new Rectangle(xRadioActive, yRadioActive, 64, 64);
-		bottle = new Image("Assets\\InitialScene\\Garbage\\oil.png");
+		bottle = new Image("Assets/InitialScene/Garbage/oil.png");
 		bottleRect = new Rectangle(xBottle, yBottle, 64, 64);
-		fish = new Image("Assets\\InitialScene\\Garbage\\fish.png");
+		fish = new Image("Assets/InitialScene/Garbage/fish.png");
 		fishRect = new Rectangle(xFish, yRadioActive, 64, 64);
 
 		try {
 			// background initial scene
 			// background property contains 5785 of width and 1600 of height
-			background = new Image("Assets\\InitialScene\\BackgroundUnderWater\\backgroundInitialScene.png");
+			background = new Image("Assets/InitialScene/BackgroundUnderWater/backgroundInitialScene.png");
 		} catch (SlickException ex) {
 			Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		/*
 		 * set the image arrays needed for the animation of diver
 		 */
-		Image[] movementRight = { new Image("Assets\\InitialScene\\SpriteScubaCharacter\\00.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\01.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\02.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\03.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\04.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\05.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\06.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\07.png"), };
-		Image[] movementLeft = { new Image("Assets\\InitialScene\\SpriteScubaCharacter\\08.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\09.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\10.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\11.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\12.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\13.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\14.png"),
-				new Image("Assets\\InitialScene\\SpriteScubaCharacter\\15.png"), };
+		Image[] movementRight = { new Image("Assets/InitialScene/SpriteScubaCharacter/00.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/01.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/02.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/03.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/04.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/05.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/06.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/07.png"), };
+		Image[] movementLeft = { new Image("Assets/InitialScene/SpriteScubaCharacter/08.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/09.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/10.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/11.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/12.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/13.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/14.png"),
+				new Image("Assets/InitialScene/SpriteScubaCharacter/15.png"), };
 
 		// load enemy data
 		loadEnemy();
@@ -207,6 +220,8 @@ public class InitialScene extends BasicGameState {
 		g.drawString(Integer.toString(points), 75, 30);
 		g.setColor(new Color(234, 32, 39));
 		g.drawString(Integer.toString(diverHealth) + "%", 75, 52);
+		g.setColor(Color.yellow);
+		g.drawString("Vertical speed: " + (int)(currentVerticalSpeed), 10, 72);
 		g.setColor(collider);
 		g.draw(div);
 		g.draw(enemyRect1);
@@ -328,7 +343,7 @@ public class InitialScene extends BasicGameState {
 		 * quadratic equation).
 		 */
 		xDiver -= ((delta * speedBackground) / 2);
-		yDiver -= Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
+//		yDiver -= Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
 		yBubble = yDiver;
 		if (diver == diverMovementLeft) {
 			xBubble = xDiver + 200;
@@ -350,28 +365,36 @@ public class InitialScene extends BasicGameState {
 		 * get user input and execute the animation need to save last user input for
 		 * diver animation
 		 */
-		// user input for up
+		// Update depth based on diver's vertical position
+		// Update depth based on diver's vertical position
+		heightWaterAboveDiver = yDiver / 100; // Assuming 520 is the surface level
+
+		// Handle user input for BCD volume
 		if (in.isKeyDown(Input.KEY_UP) || in.isKeyDown(Input.KEY_W)) {
-			// move character in y
-			yDiver -= delta * speedDiver;
-			// block character in container
-			if (yDiver <= 0) {
-				yDiver += delta * speedDiver;
-			}
-			// move bubble particle with character
-			yBubble = yDiver;
+			diverPhysics.getBuoyancyControlDevice().inflate(deltaTime, heightWaterAboveDiver + 1); // Inflate BCD
 		}
-		// user input for down
 		if (in.isKeyDown(Input.KEY_DOWN) || in.isKeyDown(Input.KEY_S)) {
-			// move character in y
-			yDiver += delta * speedDiver;
-			// block character in container
-			if (yDiver >= 520) {
-				yDiver -= delta * speedDiver;
-			}
-			// move bubble particle with character
-			yBubble = yDiver;
+			diverPhysics.getBuoyancyControlDevice().deflate(deltaTime, heightWaterAboveDiver + 1); // Deflate BCD
 		}
+
+		// Calculate the current buoyancy
+		float currentBuoyancy = diverPhysics.getCurrentBuoyancy(heightWaterAboveDiver + 1);
+
+		System.err.println("Current buoyancy " + currentBuoyancy + " Pressure " + (heightWaterAboveDiver + 1));
+
+		// Update the vertical speed based on buoyancy
+		currentVerticalSpeed += currentBuoyancy * deltaTime; // Adjust speed based on buoyancy
+
+		// Update the diver's position based on the current vertical speed
+		yDiver += - currentVerticalSpeed * deltaTime * 1; // Update position based on speed
+
+		// Ensure diver stays within bounds
+		if (yDiver < 0) {
+			yDiver = 0;
+		} else if (yDiver > 520) {
+			yDiver = 520;
+		}
+
 		// user input for left
 		if (in.isKeyDown(Input.KEY_LEFT) || in.isKeyDown(Input.KEY_A)) {
 			// move character in x and cancel buoyant force
@@ -465,23 +488,23 @@ public class InitialScene extends BasicGameState {
 	}
 
 	public void loadEnemy() throws SlickException {
-		Image[] enemyImage = { new Image("Assets\\InitialScene\\Enemies\\01.png"),
-				new Image("Assets\\InitialScene\\Enemies\\02.png"), new Image("Assets\\InitialScene\\Enemies\\03.png"),
-				new Image("Assets\\InitialScene\\Enemies\\04.png"), new Image("Assets\\InitialScene\\Enemies\\05.png"),
-				new Image("Assets\\InitialScene\\Enemies\\06.png"), new Image("Assets\\InitialScene\\Enemies\\07.png"),
-				new Image("Assets\\InitialScene\\Enemies\\08.png"), new Image("Assets\\InitialScene\\Enemies\\09.png"),
-				new Image("Assets\\InitialScene\\Enemies\\10.png"), new Image("Assets\\InitialScene\\Enemies\\11.png"),
-				new Image("Assets\\InitialScene\\Enemies\\12.png"), new Image("Assets\\InitialScene\\Enemies\\13.png"),
-				new Image("Assets\\InitialScene\\Enemies\\14.png"), new Image("Assets\\InitialScene\\Enemies\\15.png"),
-				new Image("Assets\\InitialScene\\Enemies\\16.png"), new Image("Assets\\InitialScene\\Enemies\\17.png"),
-				new Image("Assets\\InitialScene\\Enemies\\18.png"), new Image("Assets\\InitialScene\\Enemies\\19.png"),
-				new Image("Assets\\InitialScene\\Enemies\\20.png"), new Image("Assets\\InitialScene\\Enemies\\21.png"),
-				new Image("Assets\\InitialScene\\Enemies\\22.png"), new Image("Assets\\InitialScene\\Enemies\\23.png"),
-				new Image("Assets\\InitialScene\\Enemies\\24.png"), new Image("Assets\\InitialScene\\Enemies\\25.png"),
-				new Image("Assets\\InitialScene\\Enemies\\26.png"), new Image("Assets\\InitialScene\\Enemies\\27.png"),
-				new Image("Assets\\InitialScene\\Enemies\\28.png"), new Image("Assets\\InitialScene\\Enemies\\29.png"),
-				new Image("Assets\\InitialScene\\Enemies\\30.png"),
-				new Image("Assets\\InitialScene\\Enemies\\31.png"), };
+		Image[] enemyImage = { new Image("Assets/InitialScene/Enemies/01.png"),
+				new Image("Assets/InitialScene/Enemies/02.png"), new Image("Assets/InitialScene/Enemies/03.png"),
+				new Image("Assets/InitialScene/Enemies/04.png"), new Image("Assets/InitialScene/Enemies/05.png"),
+				new Image("Assets/InitialScene/Enemies/06.png"), new Image("Assets/InitialScene/Enemies/07.png"),
+				new Image("Assets/InitialScene/Enemies/08.png"), new Image("Assets/InitialScene/Enemies/09.png"),
+				new Image("Assets/InitialScene/Enemies/10.png"), new Image("Assets/InitialScene/Enemies/11.png"),
+				new Image("Assets/InitialScene/Enemies/12.png"), new Image("Assets/InitialScene/Enemies/13.png"),
+				new Image("Assets/InitialScene/Enemies/14.png"), new Image("Assets/InitialScene/Enemies/15.png"),
+				new Image("Assets/InitialScene/Enemies/16.png"), new Image("Assets/InitialScene/Enemies/17.png"),
+				new Image("Assets/InitialScene/Enemies/18.png"), new Image("Assets/InitialScene/Enemies/19.png"),
+				new Image("Assets/InitialScene/Enemies/20.png"), new Image("Assets/InitialScene/Enemies/21.png"),
+				new Image("Assets/InitialScene/Enemies/22.png"), new Image("Assets/InitialScene/Enemies/23.png"),
+				new Image("Assets/InitialScene/Enemies/24.png"), new Image("Assets/InitialScene/Enemies/25.png"),
+				new Image("Assets/InitialScene/Enemies/26.png"), new Image("Assets/InitialScene/Enemies/27.png"),
+				new Image("Assets/InitialScene/Enemies/28.png"), new Image("Assets/InitialScene/Enemies/29.png"),
+				new Image("Assets/InitialScene/Enemies/30.png"),
+				new Image("Assets/InitialScene/Enemies/31.png"), };
 		enemyAnimation1 = new Animation(enemyImage, ANIMATION_SPEED_ENEMY);
 		enemyAnimation2 = enemyAnimation1;
 		enemyRect1 = new Rectangle(xEnemy1, yEnemy1, enemyImage[0].getWidth()-10, enemyImage[0].getHeight()-10);
