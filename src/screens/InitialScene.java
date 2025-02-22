@@ -22,509 +22,488 @@ import org.newdawn.slick.Sound;
 import org.newdawn.slick.geom.Polygon;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Rectangle;
+import physics.AmbientPressureProvider;
 import physics.Diver;
+import physics.VerticalSpeed;
 
 public class InitialScene extends BasicGameState {
 
-	private Animation diver, diverMovementLeft, diverMovementRight;
-	private Animation enemyAnimation1, enemyAnimation2;
-	private Image background;
-	private float xDiver, yDiver;
-	private float xBubble, yBubble;
-	private float xBackground, yBackground;
-	private static float speedDiver = 0.2f;
-	private static float speedBackground = 0.0f;
-	private static final float BUOYANT_FORCE = 0.05f;
-	private static final int ANIMATION_SPEED_DIVER = 150;
-	private static final int ANIMATION_SPEED_ENEMY = 150;
-	private ParticleSystem systemBubbleParticleRight;
-	private ParticleSystem systemBubbleParticleLeft;
-	private ConfigurableEmitter emitterBubbleParticleRight;
-	private ConfigurableEmitter emitterBubbleParticleLeft;
-	private Image radioActive, oil, bottle, fish;
-	private float xRadioActive, yRadioActive, xOil, yOil, xBottle, yBottle, xFish, yFish;
-	Shape div;
-	Rectangle banRect, radioActiveRect, bottleRect, fishRect;
-	public int points = 0;
-	private Sound coin;
-	private Music underWater;
-	private Sound gameOver;
-	private float xEnemy1, yEnemy1, xEnemy2, yEnemy2;
-	private Rectangle enemyRect1, enemyRect2;
-	private int diverHealth = 100;
-	private Random ran;
-	private Color collider;
-	private float bcdVolume = 0.0f; // Current BCD volume from 0.0 to 1.0
-	private float targetBcdVolume = 0.0f; // Target BCD volume based on user input
-	private float volumeChangeRate = 0.005f; // Rate of change for BCD volume
-	private float depth = 0.0f; // Current depth of the diver
-	private float ascentSpeed = 0.1f; // Speed of ascent
-	private float descentSpeed = 0.1f; // Speed of descent
-	private float pressureFactor = 0.1f; // Factor to adjust buoyancy based on depth
+  private Animation diver, diverMovementLeft, diverMovementRight;
+  private Animation enemyAnimation1, enemyAnimation2;
+  private Image background;
+  private float xDiver, yDiver;
+  private float xBubble, yBubble;
+  private float xBackground, yBackground;
+  private static float speedDiver = 0.2f;
+  private static float speedBackground = 0.0f;
+  private static final float BUOYANT_FORCE = 0.05f;
+  private static final int ANIMATION_SPEED_DIVER = 150;
+  private static final int ANIMATION_SPEED_ENEMY = 150;
+  private ParticleSystem systemBubbleParticleRight;
+  private ParticleSystem systemBubbleParticleLeft;
+  private ConfigurableEmitter emitterBubbleParticleRight;
+  private ConfigurableEmitter emitterBubbleParticleLeft;
+  private Image radioActive, oil, bottle, fish;
+  private float xRadioActive, yRadioActive, xOil, yOil, xBottle, yBottle, xFish, yFish;
+  Shape div;
+  Rectangle banRect, radioActiveRect, bottleRect, fishRect;
+  public int points = 0;
+  private Sound coin;
+  private Music underWater;
+  private Sound gameOver;
+  private float xEnemy1, yEnemy1, xEnemy2, yEnemy2;
+  private Rectangle enemyRect1, enemyRect2;
+  private int diverHealth = 100;
+  private Random ran;
+  private Color collider;
 
-	private Diver diverPhysics = new Diver(8.0f);
-	private float currentVerticalSpeed = 0.0f; // Current vertical speed of the diver
-	private float deltaTime = 0.0010f; // Assuming 3000 FPS, delta time is approximately 1/60 seconds
-	private float heightWaterAboveDiver = 0.0f; // Height of water above the diver
-	private float maxVerticalSpeed = 100.0f;
-	private float minVerticalSpeed = -100.0f;
+  private final AmbientPressureProvider ambientPressure = new AmbientPressureProvider();
+  private final Diver diverPhysics = new Diver(ambientPressure, 8.0f);
+  private final VerticalSpeed verticalSpeed = new VerticalSpeed(diverPhysics, ambientPressure);
+  private float deltaTime = 0.0010f; // Assuming 3000 FPS, delta time is approximately 1/60 seconds
 
-	// ID we return to class 'Application'
-	public static final int ID = 2;
+  // ID we return to class 'Application'
+  public static final int ID = 2;
 
-	// init-method for initializing all resources
-	@Override
-	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		// stop music of main menu
+  // init-method for initializing all resources
+  @Override
+  public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
+    // stop music of main menu
 
-		// load and set initial scene/state sounds
-		coin = new Sound("Assets/InitialScene/coin.ogg");
-		gameOver = new Sound("Assets/GamerOver/GameOver.ogg");
-		underWater = new Music("Assets/InitialScene/UnderWater.ogg");
-		// underWater.loop();
-		underWater.setVolume(0.3f);
+    // load and set initial scene/state sounds
+    coin = new Sound("Assets/InitialScene/coin.ogg");
+    gameOver = new Sound("Assets/GamerOver/GameOver.ogg");
+    underWater = new Music("Assets/InitialScene/UnderWater.ogg");
+    // underWater.loop();
+    underWater.setVolume(0.3f);
 
-		// set up garbage from the scene as well as your collision body
-		oil = new Image("Assets/InitialScene/Garbage/radioactive.png");
-		banRect = new Rectangle(xOil, yOil, oil.getWidth(), oil.getHeight());
-		radioActive = new Image("Assets/InitialScene/Garbage/bottle.png");
-		radioActiveRect = new Rectangle(xRadioActive, yRadioActive, 64, 64);
-		bottle = new Image("Assets/InitialScene/Garbage/oil.png");
-		bottleRect = new Rectangle(xBottle, yBottle, 64, 64);
-		fish = new Image("Assets/InitialScene/Garbage/fish.png");
-		fishRect = new Rectangle(xFish, yRadioActive, 64, 64);
+    // set up garbage from the scene as well as your collision body
+    oil = new Image("Assets/InitialScene/Garbage/radioactive.png");
+    banRect = new Rectangle(xOil, yOil, oil.getWidth(), oil.getHeight());
+    radioActive = new Image("Assets/InitialScene/Garbage/bottle.png");
+    radioActiveRect = new Rectangle(xRadioActive, yRadioActive, 64, 64);
+    bottle = new Image("Assets/InitialScene/Garbage/oil.png");
+    bottleRect = new Rectangle(xBottle, yBottle, 64, 64);
+    fish = new Image("Assets/InitialScene/Garbage/fish.png");
+    fishRect = new Rectangle(xFish, yRadioActive, 64, 64);
 
-		try {
-			// background initial scene
-			// background property contains 5785 of width and 1600 of height
-			background = new Image("Assets/InitialScene/BackgroundUnderWater/backgroundInitialScene.png");
-		} catch (SlickException ex) {
-			Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		/*
-		 * set the image arrays needed for the animation of diver
-		 */
-		Image[] movementRight = { new Image("Assets/InitialScene/SpriteScubaCharacter/00.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/01.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/02.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/03.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/04.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/05.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/06.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/07.png"), };
-		Image[] movementLeft = { new Image("Assets/InitialScene/SpriteScubaCharacter/08.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/09.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/10.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/11.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/12.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/13.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/14.png"),
-				new Image("Assets/InitialScene/SpriteScubaCharacter/15.png"), };
+    try {
+      // background initial scene
+      // background property contains 5785 of width and 1600 of height
+      background = new Image("Assets/InitialScene/BackgroundUnderWater/backgroundInitialScene.png");
+    } catch (SlickException ex) {
+      Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    /*
+     * set the image arrays needed for the animation of diver
+     */
+    Image[] movementRight = {new Image("Assets/InitialScene/SpriteScubaCharacter/00.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/01.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/02.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/03.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/04.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/05.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/06.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/07.png"),};
+    Image[] movementLeft = {new Image("Assets/InitialScene/SpriteScubaCharacter/08.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/09.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/10.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/11.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/12.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/13.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/14.png"),
+      new Image("Assets/InitialScene/SpriteScubaCharacter/15.png"),};
 
-		// load enemy data
-		loadEnemy();
+    // load enemy data
+    loadEnemy();
 
-		/*
-		 * set the animations with images arrays presets
-		 */
-		diverMovementLeft = new Animation(movementRight, ANIMATION_SPEED_DIVER);
-		diverMovementRight = new Animation(movementLeft, ANIMATION_SPEED_DIVER);
-		float diverCoord[] = { 80, 50, 185, 20, 290, 25, 280, 80, 110, 80 };
-		div = new Polygon(diverCoord);
+    /*
+     * set the animations with images arrays presets
+     */
+    diverMovementLeft = new Animation(movementRight, ANIMATION_SPEED_DIVER);
+    diverMovementRight = new Animation(movementLeft, ANIMATION_SPEED_DIVER);
+    float diverCoord[] = {80, 50, 185, 20, 290, 25, 280, 80, 110, 80};
+    div = new Polygon(diverCoord);
 
-		// set initial animation of diver
-		diver = diverMovementLeft;
-		// set position x and y based on application property
-		xDiver = ScubaDiving.HEIGHT / 6;
-		yDiver = ScubaDiving.WIDTH / 2;
-		// bubble particle position
-		xBubble = xDiver + 200;
-		yBubble = yDiver;
-		/*
-		 * plotting background initial scene x = 0 and 1600 being background height and
-		 * 600 being application height 1600-600 = 1000 -> -1000 to start on the y = 0
-		 * axis
-		 */
-		ran = new Random();
-		xBackground = 0;
-		yBackground = 0;
+    // set initial animation of diver
+    diver = diverMovementLeft;
+    // set position x and y based on application property
+    xDiver = (float) ScubaDiving.HEIGHT / 6;
+    yDiver = (float) ScubaDiving.WIDTH / 2;
+    // bubble particle position
+    xBubble = xDiver + 200;
+    yBubble = yDiver;
+    /*
+     * plotting background initial scene x = 0 and 1600 being background height and
+     * 600 being application height 1600-600 = 1000 -> -1000 to start on the y = 0
+     * axis
+     */
+    ran = new Random();
+    xBackground = 0;
+    yBackground = 0;
 
-		// configure x and y initial for garbage and enemies through random generation
-		xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yOil = ran.nextInt((int) (540));
+    // configure x and y initial for garbage and enemies through random generation
+    xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yOil = ran.nextInt((int) (540));
 
-		xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yBottle = ran.nextInt((int) (540));
+    xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yBottle = ran.nextInt((int) (540));
 
-		xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yFish = ran.nextInt((int) (540));
+    xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yFish = ran.nextInt((int) (540));
 
-		xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yRadioActive = ran.nextInt((int) (540));
+    xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yRadioActive = ran.nextInt((int) (540));
 
-		xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yEnemy1 = ran.nextInt((int) (540));
+    xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yEnemy1 = ran.nextInt((int) (540));
 
-		xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-		yEnemy2 = ran.nextInt((int) (540));
-		// configuring particle system and emitter
-		try {
-			// bubble particle image
-			Image bubbleImage = new Image("data/bubbleparticle.png", false);
-			// load emitter for bubble particle right
-			systemBubbleParticleRight = new ParticleSystem(bubbleImage, 3000);
-			File xmlFileEmitterBubbleParticleRight;
-			xmlFileEmitterBubbleParticleRight = new File("data/bubbleParticleRight.xml");
-			emitterBubbleParticleRight = ParticleIO.loadEmitter(xmlFileEmitterBubbleParticleRight);
-			// load emitter for bubble particle left
-			systemBubbleParticleLeft = new ParticleSystem(bubbleImage, 3000);
-			File xmlFile = new File("data/bubbleParticleLeft.xml");
-			emitterBubbleParticleLeft = ParticleIO.loadEmitter(xmlFile);
-		} catch (Exception ex) {
-			Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		// initialization with particle bubble particle right
-		systemBubbleParticleRight.addEmitter(emitterBubbleParticleRight);
-		systemBubbleParticleLeft.addEmitter(emitterBubbleParticleLeft);
-		// set visible system bubble particle left like false
-		systemBubbleParticleLeft.setVisible(false);
-		// system use set points
-		systemBubbleParticleRight.setUsePoints(true);
-		systemBubbleParticleLeft.setUsePoints(true);
-		// blend mode of system particle
-		systemBubbleParticleRight.setBlendingMode(ParticleSystem.BLEND_ADDITIVE);
-		systemBubbleParticleLeft.setBlendingMode(ParticleSystem.BLEND_ADDITIVE);
-		// set color hack collider
-		collider = new Color(Color.transparent);
-	}
+    xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+    yEnemy2 = ran.nextInt((int) (540));
+    // configuring particle system and emitter
+    try {
+      // bubble particle image
+      Image bubbleImage = new Image("data/bubbleparticle.png", false);
+      // load emitter for bubble particle right
+      systemBubbleParticleRight = new ParticleSystem(bubbleImage, 3000);
+      File xmlFileEmitterBubbleParticleRight;
+      xmlFileEmitterBubbleParticleRight = new File("data/bubbleParticleRight.xml");
+      emitterBubbleParticleRight = ParticleIO.loadEmitter(xmlFileEmitterBubbleParticleRight);
+      // load emitter for bubble particle left
+      systemBubbleParticleLeft = new ParticleSystem(bubbleImage, 3000);
+      File xmlFile = new File("data/bubbleParticleLeft.xml");
+      emitterBubbleParticleLeft = ParticleIO.loadEmitter(xmlFile);
+    } catch (Exception ex) {
+      Logger.getLogger(SplashScreen.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    // initialization with particle bubble particle right
+    systemBubbleParticleRight.addEmitter(emitterBubbleParticleRight);
+    systemBubbleParticleLeft.addEmitter(emitterBubbleParticleLeft);
+    // set visible system bubble particle left like false
+    systemBubbleParticleLeft.setVisible(false);
+    // system use set points
+    systemBubbleParticleRight.setUsePoints(true);
+    systemBubbleParticleLeft.setUsePoints(true);
+    // blend mode of system particle
+    systemBubbleParticleRight.setBlendingMode(ParticleSystem.BLEND_ADDITIVE);
+    systemBubbleParticleLeft.setBlendingMode(ParticleSystem.BLEND_ADDITIVE);
+    // set color hack collider
+    collider = new Color(Color.transparent);
+  }
 
-	// render-method for all the things happening on-screen
-	@Override
-	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
-		// draw background initial scene
-		g.drawImage(background, xBackground, yBackground);
-		g.drawImage(oil, xOil, yOil);
-		g.drawImage(radioActive, xRadioActive, yRadioActive);
-		g.drawImage(bottle, xBottle, yBottle);
-		g.drawImage(fish, xFish, yFish);
-		enemyAnimation1.draw(xEnemy1, yEnemy1);
-		enemyAnimation2.draw(xEnemy2, yEnemy2);
-		// g.draw(enemyRect);
-		// render the particle system
-		systemBubbleParticleRight.render();
-		systemBubbleParticleLeft.render();
-		// draw diver character
-		diver.draw((int) xDiver, (int) yDiver);
-		// g.draw(div);
-		g.setColor(Color.yellow);
-		g.drawString("Points:" + "\nHealth: ", 10, 32);
-		g.setColor(new Color(6, 82, 221));
-		g.drawString(Integer.toString(points), 75, 30);
-		g.setColor(new Color(234, 32, 39));
-		g.drawString(Integer.toString(diverHealth) + "%", 75, 52);
-		g.setColor(Color.yellow);
-		g.drawString("Vertical speed: " + (int)(currentVerticalSpeed), 10, 72);
-		g.setColor(collider);
-		g.draw(div);
-		g.draw(enemyRect1);
-		g.draw(enemyRect2);
-	}
+  // render-method for all the things happening on-screen
+  @Override
+  public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
+    // draw background initial scene
+    g.drawImage(background, xBackground, yBackground);
+    g.drawImage(oil, xOil, yOil);
+    g.drawImage(radioActive, xRadioActive, yRadioActive);
+    g.drawImage(bottle, xBottle, yBottle);
+    g.drawImage(fish, xFish, yFish);
+    enemyAnimation1.draw(xEnemy1, yEnemy1);
+    enemyAnimation2.draw(xEnemy2, yEnemy2);
+    // g.draw(enemyRect);
+    // render the particle system
+    systemBubbleParticleRight.render();
+    systemBubbleParticleLeft.render();
+    // draw diver character
+    diver.draw((int) xDiver, (int) yDiver);
+    // g.draw(div);
+    g.setColor(Color.yellow);
+    g.drawString("Points:" + "\nHealth: ", 10, 32);
+    g.setColor(new Color(6, 82, 221));
+    g.drawString(Integer.toString(points), 75, 30);
+    g.setColor(new Color(234, 32, 39));
+    g.drawString(Integer.toString(diverHealth) + "%", 75, 52);
+    g.setColor(Color.yellow);
+    g.drawString("Vertical speed: " + (int) (verticalSpeed.getCurrentVerticalSpeed()), 10, 72);
+    g.setColor(Color.yellow);
+    g.drawString("BCD volume: " + (int) (diverPhysics.getBuoyancyControlDevice().getCurrentVolume(ambientPressure.get())), 10, 92);
+    g.setColor(collider);
+    g.draw(div);
+    g.draw(enemyRect1);
+    g.draw(enemyRect2);
+  }
 
-	// update-method with all the magic happening in it
-	@Override
-	public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
-		// location settings for diver, junk and enemy polygons
-		div.setLocation(xDiver, yDiver);
-		banRect.setLocation(xOil, yOil);
-		radioActiveRect.setLocation(xRadioActive, yRadioActive);
-		fishRect.setLocation(xFish, yFish);
-		bottleRect.setLocation(xBottle, yBottle);
-		enemyRect1.setLocation(xEnemy1, yEnemy1);
-		enemyRect2.setLocation(xEnemy2, yEnemy2);
+  // update-method with all the magic happening in it
+  @Override
+  public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
+    // location settings for diver, junk and enemy polygons
+    div.setLocation(xDiver, yDiver);
+    banRect.setLocation(xOil, yOil);
+    radioActiveRect.setLocation(xRadioActive, yRadioActive);
+    fishRect.setLocation(xFish, yFish);
+    bottleRect.setLocation(xBottle, yBottle);
+    enemyRect1.setLocation(xEnemy1, yEnemy1);
+    enemyRect2.setLocation(xEnemy2, yEnemy2);
 
-		// check if diver collided with any of the objects in scene,
-		// if yes, count point and are repositioned
-		if (div.intersects(banRect)) {
-			xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yOil = ran.nextInt((int) (540));
-			points += 10;
-			coin.play(1.0f, 0.5f);
-			speedBackground += 0.009f;
-			speedDiver += 0.009f;
-		}
-		if (div.intersects(radioActiveRect)) {
-			xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yRadioActive = ran.nextInt((int) (540));
-			points += 10;
-			coin.play(1.0f, 0.5f);
-			speedBackground += 0.01f;
-			speedDiver += 0.009f;
-		}
-		if (div.intersects(fishRect)) {
-			xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yFish = ran.nextInt((int) (540));
-			points += 10;
-			coin.play(1.0f, 0.5f);
-			speedBackground += 0.01f;
-			speedDiver += 0.009f;
-		}
-		if (div.intersects(bottleRect)) {
-			xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yBottle = ran.nextInt((int) (540));
-			points += 10;
-			coin.play(1.0f, 0.5f);
-			speedBackground += 0.01f;
-			speedDiver += 0.009f;
-		}
+    // check if diver collided with any of the objects in scene,
+    // if yes, count point and are repositioned
+    if (div.intersects(banRect)) {
+      xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yOil = ran.nextInt((int) (540));
+      points += 10;
+      coin.play(1.0f, 0.5f);
+      speedBackground += 0.009f;
+      speedDiver += 0.009f;
+    }
+    if (div.intersects(radioActiveRect)) {
+      xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yRadioActive = ran.nextInt((int) (540));
+      points += 10;
+      coin.play(1.0f, 0.5f);
+      speedBackground += 0.01f;
+      speedDiver += 0.009f;
+    }
+    if (div.intersects(fishRect)) {
+      xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yFish = ran.nextInt((int) (540));
+      points += 10;
+      coin.play(1.0f, 0.5f);
+      speedBackground += 0.01f;
+      speedDiver += 0.009f;
+    }
+    if (div.intersects(bottleRect)) {
+      xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yBottle = ran.nextInt((int) (540));
+      points += 10;
+      coin.play(1.0f, 0.5f);
+      speedBackground += 0.01f;
+      speedDiver += 0.009f;
+    }
 
-		// check if litter has reached bottom, otherwise continue to go down and spin
-		if ((xDiver - xOil) < 600) {
-			if (!(yOil >= 536)) {
-				oil.rotate(+0.01f);
-				yOil += 0.008f;
-			}
-		}
-		if ((xDiver - xRadioActive) < 600) {
-			if (!(yRadioActive >= 536)) {
-				radioActive.rotate(+0.01f);
-				yRadioActive += 0.008f;
-			}
-		}
-		if ((xDiver - xBottle) < 600) {
-			if (!(yBottle >= 536)) {
-				bottle.rotate(+0.01f);
-				yBottle += 0.008f;
-			}
-		}
-		if ((xDiver - xFish) < 600) {
-			if (!(yFish >= 536)) {
-				fish.rotate(+0.01f);
-				yFish += 0.008f;
-			}
-		}
+    // check if litter has reached bottom, otherwise continue to go down and spin
+    if ((xDiver - xOil) < 600) {
+      if (!(yOil >= 536)) {
+        oil.rotate(+0.01f);
+        yOil += 0.008f;
+      }
+    }
+    if ((xDiver - xRadioActive) < 600) {
+      if (!(yRadioActive >= 536)) {
+        radioActive.rotate(+0.01f);
+        yRadioActive += 0.008f;
+      }
+    }
+    if ((xDiver - xBottle) < 600) {
+      if (!(yBottle >= 536)) {
+        bottle.rotate(+0.01f);
+        yBottle += 0.008f;
+      }
+    }
+    if ((xDiver - xFish) < 600) {
+      if (!(yFish >= 536)) {
+        fish.rotate(+0.01f);
+        yFish += 0.008f;
+      }
+    }
 
-		// check if objects have left the scene, if yes,
-		// diver loses life and objects are repositioned
-		if (xBottle < -32) {
-			diverHealth -= 5;
-			xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yBottle = ran.nextInt((int) (540));
-		} else if (xFish < -32) {
-			diverHealth -= 5;
-			xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yFish = ran.nextInt((int) (540));
-		} else if ((xOil) < -32) {
-			diverHealth -= 5;
-			xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yOil = ran.nextInt((int) (540));
-		} else if (xRadioActive < -32) {
-			diverHealth -= 5;
-			xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yRadioActive = ran.nextInt((int) (540));
-		} else if (xEnemy1 < -32) {
-			xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yEnemy1 = ran.nextInt((int) (540));
-		} else if (xEnemy2 < -32) {
-			xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-			yEnemy2 = ran.nextInt((int) (540));
-		}
+    // check if objects have left the scene, if yes,
+    // diver loses life and objects are repositioned
+    if (xBottle < -32) {
+      diverHealth -= 5;
+      xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yBottle = ran.nextInt((int) (540));
+    } else if (xFish < -32) {
+      diverHealth -= 5;
+      xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yFish = ran.nextInt((int) (540));
+    } else if ((xOil) < -32) {
+      diverHealth -= 5;
+      xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yOil = ran.nextInt((int) (540));
+    } else if (xRadioActive < -32) {
+      diverHealth -= 5;
+      xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yRadioActive = ran.nextInt((int) (540));
+    } else if (xEnemy1 < -32) {
+      xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yEnemy1 = ran.nextInt((int) (540));
+    } else if (xEnemy2 < -32) {
+      xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
+      yEnemy2 = ran.nextInt((int) (540));
+    }
 
-		// setClearEachFrame
-		gc.setClearEachFrame(true);
-		// background has motion according to delta and speed background scaling
-		xBackground -= delta * speedBackground;
-		xOil -= delta * speedBackground;
-		xFish -= delta * speedBackground;
-		xBottle -= delta * speedBackground;
-		xRadioActive -= delta * speedBackground;
-		xEnemy1 -= delta * speedBackground;
-		xEnemy2 -= delta * speedBackground;
-		/*
-		 * movement of the character in relation to the movement of the background When
-		 * a character does not move, the buoyant force is also used (through a
-		 * quadratic equation).
-		 */
-		xDiver -= ((delta * speedBackground) / 2);
+    // setClearEachFrame
+    gc.setClearEachFrame(true);
+    // background has motion according to delta and speed background scaling
+    xBackground -= delta * speedBackground;
+    xOil -= delta * speedBackground;
+    xFish -= delta * speedBackground;
+    xBottle -= delta * speedBackground;
+    xRadioActive -= delta * speedBackground;
+    xEnemy1 -= delta * speedBackground;
+    xEnemy2 -= delta * speedBackground;
+    /*
+     * movement of the character in relation to the movement of the background When
+     * a character does not move, the buoyant force is also used (through a
+     * quadratic equation).
+     */
+    xDiver -= ((delta * speedBackground) / 2);
 //		yDiver -= Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
-		yBubble = yDiver;
-		if (diver == diverMovementLeft) {
-			xBubble = xDiver + 200;
-		} else {
-			xBubble = xDiver;
-		}
-		/*
-		 * If the background case reaches its end = -4985, return it to the initial
-		 * position of the axis. This coordinate is in relation to 5785 (background
-		 * image width) - 600 (application width)
-		 */
-		if (xBackground <= -2831) {
-			xBackground = 0;
-		}
+    yBubble = yDiver;
+    if (diver == diverMovementLeft) {
+      xBubble = xDiver + 200;
+    } else {
+      xBubble = xDiver;
+    }
+    /*
+     * If the background case reaches its end = -4985, return it to the initial
+     * position of the axis. This coordinate is in relation to 5785 (background
+     * image width) - 600 (application width)
+     */
+    if (xBackground <= -2831) {
+      xBackground = 0;
+    }
 
-		// ****---- get user input
-		Input in = gc.getInput();
-		/**
-		 * get user input and execute the animation need to save last user input for
-		 * diver animation
-		 */
-		// Update depth based on diver's vertical position
-		// Update depth based on diver's vertical position
-		heightWaterAboveDiver = yDiver / 100; // Assuming 520 is the surface level
+    // ****---- get user input
+    Input in = gc.getInput();
+    /**
+     * get user input and execute the animation need to save last user input for
+     * diver animation
+     */
+    // Update depth based on diver's vertical position
 
-		// Handle user input for BCD volume
-		if (in.isKeyDown(Input.KEY_UP) || in.isKeyDown(Input.KEY_W)) {
-			diverPhysics.getBuoyancyControlDevice().inflate(deltaTime, heightWaterAboveDiver + 1); // Inflate BCD
-		}
-		if (in.isKeyDown(Input.KEY_DOWN) || in.isKeyDown(Input.KEY_S)) {
-			diverPhysics.getBuoyancyControlDevice().deflate(deltaTime, heightWaterAboveDiver + 1); // Deflate BCD
-		}
+    ambientPressure.update(yDiver);
 
-		// Calculate the current buoyancy
-		float currentBuoyancy = diverPhysics.getCurrentBuoyancy(heightWaterAboveDiver + 1);
+    // Handle user input for BCD volume
+    if (in.isKeyDown(Input.KEY_UP) || in.isKeyDown(Input.KEY_W)) {
+      diverPhysics.getBuoyancyControlDevice().inflate(deltaTime);
+    }
+    if (in.isKeyDown(Input.KEY_DOWN) || in.isKeyDown(Input.KEY_S)) {
+      diverPhysics.getBuoyancyControlDevice().deflate(deltaTime);
+    }
 
-		System.err.println("Current buoyancy " + currentBuoyancy + " Pressure " + (heightWaterAboveDiver + 1));
+    // Update the diver's position based on the current vertical speed
+    yDiver += -verticalSpeed.updateAndGetCurrentVerticalSpeed(deltaTime) * deltaTime;
 
-		// Update the vertical speed based on buoyancy
-		currentVerticalSpeed += currentBuoyancy * deltaTime; // Adjust speed based on buoyancy
+    // Ensure diver stays within bounds
+    if (yDiver < 0) {
+      yDiver = 0;
+    } else if (yDiver > 520) {
+      yDiver = 520;
+    }
 
-		if (currentVerticalSpeed < minVerticalSpeed) {
-			currentVerticalSpeed = minVerticalSpeed;
-		}
+    // user input for left
+    if (in.isKeyDown(Input.KEY_LEFT) || in.isKeyDown(Input.KEY_A)) {
+      // move character in x and cancel buoyant force
+      xDiver -= delta * speedDiver;
+      yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
+      // move bubble particle with character
+      xBubble = xDiver;
+      // set visible false for particle system right and true for particle system
+      // right
+      systemBubbleParticleRight.setVisible(false);
+      systemBubbleParticleLeft.setVisible(true);
+      // load animation for character
+      diver = diverMovementRight;
+      // update animation speed
+      diver.update(delta);
+    }
+    // user input for right
+    if (in.isKeyDown(Input.KEY_RIGHT) || in.isKeyDown(Input.KEY_D)) {
+      // move character in x and cancel buoyant force
+      xDiver += delta * speedDiver;
+      yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
+      // block character in container
+      if (xDiver >= 588) {
+        xDiver -= delta * speedDiver;
+      }
+      // move bubble particle with character
+      xBubble = xDiver + 200;
+      // set visible true for particle system right and false for particle system
+      // right
+      systemBubbleParticleRight.setVisible(true);
+      systemBubbleParticleLeft.setVisible(false);
+      // load animation for character
+      diver = diverMovementLeft;
+      // update animation speed
+      diver.update(delta);
+    }
+    // reload position of bubble particle
+    systemBubbleParticleRight.setPosition(xBubble, yBubble);
+    systemBubbleParticleLeft.setPosition(xBubble, yBubble);
+    // update system particle
+    systemBubbleParticleRight.update(delta);
+    systemBubbleParticleLeft.update(delta);
+    /*
+     * Calling game over character case stay out of the container. -200 because it
+     * is the width of the character (200 px) in relation to the width of the
+     * application
+     */
+    if (((xDiver <= -200) || (div.intersects(enemyRect1))) || (div.intersects(enemyRect2)) || diverHealth < 0) {
+      underWater.stop();
+      gameOver.play(1f, 0.3f);
+      try {
+        gc.pause();
+        Thread.sleep(3000);
+      } catch (InterruptedException ex) {
+        Logger.getLogger(InitialScene.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      gc.resume();
+      sbg.enterState(3, new transition.MosaicTransitionOut(450f), new transition.MosaicTransitionIn(0.3f));
+    }
+    if (yDiver <= 0) {
+      yDiver += delta * speedDiver;
+    }
+    // escape means, close the program
+    if (in.isKeyPressed(Input.KEY_ESCAPE)) {
+      System.exit(0);
+    }
+    // hack collider
+    if (in.isKeyPressed(Input.KEY_G)) {
+      if (collider.getRed() == 0 && collider.getGreen() == 0 && collider.getBlue() == 0) {
+        collider = new Color(142, 68, 173);
+      } else {
+        collider = new Color(Color.transparent);
+      }
+    }
+  }
 
-		if (currentVerticalSpeed > maxVerticalSpeed) {
-			currentVerticalSpeed = maxVerticalSpeed;
-		}
+  // Returning 'ID' from class 'MainMenu'
+  @Override
+  public int getID() {
+    return InitialScene.ID;
+  }
 
-		// Update the diver's position based on the current vertical speed
-		yDiver += - currentVerticalSpeed * deltaTime * 1; // Update position based on speed
+  public int randomOnX() {
+    Random generator = new Random();
+    return generator.nextInt(5000);
+  }
 
-		// Ensure diver stays within bounds
-		if (yDiver < 0) {
-			yDiver = 0;
-		} else if (yDiver > 520) {
-			yDiver = 520;
-		}
+  public int randomOnY() {
+    Random generator = new Random();
+    return generator.nextInt(600);
+  }
 
-		// user input for left
-		if (in.isKeyDown(Input.KEY_LEFT) || in.isKeyDown(Input.KEY_A)) {
-			// move character in x and cancel buoyant force
-			xDiver -= delta * speedDiver;
-			yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
-			// move bubble particle with character
-			xBubble = xDiver;
-			// set visible false for particle system right and true for particle system
-			// right
-			systemBubbleParticleRight.setVisible(false);
-			systemBubbleParticleLeft.setVisible(true);
-			// load animation for character
-			diver = diverMovementRight;
-			// update animation speed
-			diver.update(delta);
-		}
-		// user input for right
-		if (in.isKeyDown(Input.KEY_RIGHT) || in.isKeyDown(Input.KEY_D)) {
-			// move character in x and cancel buoyant force
-			xDiver += delta * speedDiver;
-			yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
-			// block character in container
-			if (xDiver >= 588) {
-				xDiver -= delta * speedDiver;
-			}
-			// move bubble particle with character
-			xBubble = xDiver + 200;
-			// set visible true for particle system right and false for particle system
-			// right
-			systemBubbleParticleRight.setVisible(true);
-			systemBubbleParticleLeft.setVisible(false);
-			// load animation for character
-			diver = diverMovementLeft;
-			// update animation speed
-			diver.update(delta);
-		}
-		// reload position of bubble particle
-		systemBubbleParticleRight.setPosition(xBubble, yBubble);
-		systemBubbleParticleLeft.setPosition(xBubble, yBubble);
-		// update system particle
-		systemBubbleParticleRight.update(delta);
-		systemBubbleParticleLeft.update(delta);
-		/*
-		 * Calling game over character case stay out of the container. -200 because it
-		 * is the width of the character (200 px) in relation to the width of the
-		 * application
-		 */
-		if (((xDiver <= -200) || (div.intersects(enemyRect1))) || (div.intersects(enemyRect2)) || diverHealth < 0) {
-			underWater.stop();
-			gameOver.play(1f, 0.3f);
-			try {
-				gc.pause();
-				Thread.sleep(3000);
-			} catch (InterruptedException ex) {
-				Logger.getLogger(InitialScene.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			gc.resume();
-			sbg.enterState(3, new transition.MosaicTransitionOut(450f), new transition.MosaicTransitionIn(0.3f));
-		}
-		if (yDiver <= 0) {
-			yDiver += delta * speedDiver;
-		}
-		// escape means, close the program
-		if (in.isKeyPressed(Input.KEY_ESCAPE)) {
-			System.exit(0);
-		}
-		// hack collider
-		if (in.isKeyPressed(Input.KEY_G)) {
-			if (collider.getRed() == 0 && collider.getGreen() == 0 && collider.getBlue() == 0) {
-				collider = new Color(142, 68, 173);
-			} else {
-				collider = new Color(Color.transparent);
-			}
-		}
-	}
+  public void loadEnemy() throws SlickException {
+    Image[] enemyImage = {new Image("Assets/InitialScene/Enemies/01.png"),
+      new Image("Assets/InitialScene/Enemies/02.png"), new Image("Assets/InitialScene/Enemies/03.png"),
+      new Image("Assets/InitialScene/Enemies/04.png"), new Image("Assets/InitialScene/Enemies/05.png"),
+      new Image("Assets/InitialScene/Enemies/06.png"), new Image("Assets/InitialScene/Enemies/07.png"),
+      new Image("Assets/InitialScene/Enemies/08.png"), new Image("Assets/InitialScene/Enemies/09.png"),
+      new Image("Assets/InitialScene/Enemies/10.png"), new Image("Assets/InitialScene/Enemies/11.png"),
+      new Image("Assets/InitialScene/Enemies/12.png"), new Image("Assets/InitialScene/Enemies/13.png"),
+      new Image("Assets/InitialScene/Enemies/14.png"), new Image("Assets/InitialScene/Enemies/15.png"),
+      new Image("Assets/InitialScene/Enemies/16.png"), new Image("Assets/InitialScene/Enemies/17.png"),
+      new Image("Assets/InitialScene/Enemies/18.png"), new Image("Assets/InitialScene/Enemies/19.png"),
+      new Image("Assets/InitialScene/Enemies/20.png"), new Image("Assets/InitialScene/Enemies/21.png"),
+      new Image("Assets/InitialScene/Enemies/22.png"), new Image("Assets/InitialScene/Enemies/23.png"),
+      new Image("Assets/InitialScene/Enemies/24.png"), new Image("Assets/InitialScene/Enemies/25.png"),
+      new Image("Assets/InitialScene/Enemies/26.png"), new Image("Assets/InitialScene/Enemies/27.png"),
+      new Image("Assets/InitialScene/Enemies/28.png"), new Image("Assets/InitialScene/Enemies/29.png"),
+      new Image("Assets/InitialScene/Enemies/30.png"),
+      new Image("Assets/InitialScene/Enemies/31.png"),};
+    enemyAnimation1 = new Animation(enemyImage, ANIMATION_SPEED_ENEMY);
+    enemyAnimation2 = enemyAnimation1;
+    enemyRect1 = new Rectangle(xEnemy1, yEnemy1, enemyImage[0].getWidth() - 10, enemyImage[0].getHeight() - 10);
+    enemyRect2 = new Rectangle(xEnemy2, yEnemy2, enemyImage[0].getWidth() - 10, enemyImage[0].getHeight() - 10);
+  }
 
-	// Returning 'ID' from class 'MainMenu'
-	@Override
-	public int getID() {
-		return InitialScene.ID;
-	}
-
-	public int randomOnX() {
-		Random generator = new Random();
-		return generator.nextInt(5000);
-	}
-
-	public int randomOnY() {
-		Random generator = new Random();
-		return generator.nextInt(600);
-	}
-
-	public void loadEnemy() throws SlickException {
-		Image[] enemyImage = { new Image("Assets/InitialScene/Enemies/01.png"),
-				new Image("Assets/InitialScene/Enemies/02.png"), new Image("Assets/InitialScene/Enemies/03.png"),
-				new Image("Assets/InitialScene/Enemies/04.png"), new Image("Assets/InitialScene/Enemies/05.png"),
-				new Image("Assets/InitialScene/Enemies/06.png"), new Image("Assets/InitialScene/Enemies/07.png"),
-				new Image("Assets/InitialScene/Enemies/08.png"), new Image("Assets/InitialScene/Enemies/09.png"),
-				new Image("Assets/InitialScene/Enemies/10.png"), new Image("Assets/InitialScene/Enemies/11.png"),
-				new Image("Assets/InitialScene/Enemies/12.png"), new Image("Assets/InitialScene/Enemies/13.png"),
-				new Image("Assets/InitialScene/Enemies/14.png"), new Image("Assets/InitialScene/Enemies/15.png"),
-				new Image("Assets/InitialScene/Enemies/16.png"), new Image("Assets/InitialScene/Enemies/17.png"),
-				new Image("Assets/InitialScene/Enemies/18.png"), new Image("Assets/InitialScene/Enemies/19.png"),
-				new Image("Assets/InitialScene/Enemies/20.png"), new Image("Assets/InitialScene/Enemies/21.png"),
-				new Image("Assets/InitialScene/Enemies/22.png"), new Image("Assets/InitialScene/Enemies/23.png"),
-				new Image("Assets/InitialScene/Enemies/24.png"), new Image("Assets/InitialScene/Enemies/25.png"),
-				new Image("Assets/InitialScene/Enemies/26.png"), new Image("Assets/InitialScene/Enemies/27.png"),
-				new Image("Assets/InitialScene/Enemies/28.png"), new Image("Assets/InitialScene/Enemies/29.png"),
-				new Image("Assets/InitialScene/Enemies/30.png"),
-				new Image("Assets/InitialScene/Enemies/31.png"), };
-		enemyAnimation1 = new Animation(enemyImage, ANIMATION_SPEED_ENEMY);
-		enemyAnimation2 = enemyAnimation1;
-		enemyRect1 = new Rectangle(xEnemy1, yEnemy1, enemyImage[0].getWidth()-10, enemyImage[0].getHeight()-10);
-		enemyRect2 = new Rectangle(xEnemy2, yEnemy2, enemyImage[0].getWidth()-10, enemyImage[0].getHeight()-10);
-	}
-
-	/**
-	 * @return the underWater
-	 */
-	public void setUnderWaterLoop() {
-		underWater.loop();
-	}
+  /**
+   * @return the underWater
+   */
+  public void setUnderWaterLoop() {
+    underWater.loop();
+  }
 }

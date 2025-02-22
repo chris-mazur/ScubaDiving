@@ -2,17 +2,16 @@ package physics;
 
 public class Diver {
 
-  private final float weightDisplacedWaterKg = 80.0f;
-  private final float weightDiverKg = 78.0f;
+  private static final float WEIGHT_DISPLACED_WATER_KG = 80.0f;
+  private static final float WEIGHT_DIVER_KG = 78.0f;
+  private static final float BALLAST_WEIGHT = 10.0f;
   private final BuoyancyControlDevice  buoyancyControlDevice;
-  private final float ballastWeight = 10.0f;
 
-  public Diver(float currentBcdDisplacement) {
-    this.buoyancyControlDevice = new BuoyancyControlDevice(currentBcdDisplacement);
+  public Diver(AmbientPressureProvider ambientPressureProvider, float currentBcdDisplacement) {
+    this.buoyancyControlDevice = new BuoyancyControlDevice(ambientPressureProvider, currentBcdDisplacement);
   }
 
   public float getCurrentBuoyancy(float ambientPressure) {
-    System.err.println("Positive " + getPositiveBuoyancy(ambientPressure) + " negative " + getNegativeBuoyancy());
     return getPositiveBuoyancy(ambientPressure) - getNegativeBuoyancy();
   }
 
@@ -21,11 +20,10 @@ public class Diver {
   }
 
   public float getPositiveBuoyancy(float ambientPressure) {
-    System.err.println("Weight displaced " + weightDisplacedWaterKg + "Current volume " + buoyancyControlDevice.getCurrentVolume(ambientPressure));
-    return weightDisplacedWaterKg + buoyancyControlDevice.getCurrentVolume(ambientPressure);
+    return WEIGHT_DISPLACED_WATER_KG + buoyancyControlDevice.getCurrentVolume(ambientPressure);
   }
 
   public float getNegativeBuoyancy() {
-    return weightDiverKg + ballastWeight;
+    return WEIGHT_DIVER_KG + BALLAST_WEIGHT;
   }
 }

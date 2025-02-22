@@ -2,14 +2,17 @@ package physics;
 
 public class BuoyancyControlDevice {
 
-  private final float inflationRateSeaLevel = 10.5f; // 0.5-1.5 typically
+  private static final float INFLATION_RATE_SEA_LEVEL = 10.0f; // 0.5-1.5 typically
+  private static final float MIN_VOLUME = 0.0f;
+  private static final float MAX_VOLUME = 100.0f;
 
-  private float minVolume = 3f;
-  private float maxVolume = 10f;
+  private final AmbientPressureProvider ambientPressureProvider;
+  private float currentVolume;
 
-  private float currentVolume ;
-
-  public BuoyancyControlDevice(float currentVolume) {
+  public BuoyancyControlDevice(
+    AmbientPressureProvider ambientPressureProvider,
+    float currentVolume) {
+    this.ambientPressureProvider = ambientPressureProvider;
     this.currentVolume = currentVolume;
   }
 
@@ -17,13 +20,22 @@ public class BuoyancyControlDevice {
     return currentVolume / ambientPressure;
   }
 
-  public void inflate(float durationOfInflationInSeconds, float ambientPressure) {
-    this.currentVolume = this.currentVolume + durationOfInflationInSeconds * inflationRateSeaLevel * ambientPressure;
-    System.err.println("Inflate Volume " + currentVolume);
+  public void inflate(float durationOfInflationInSeconds) {
+    updateVolume(durationOfInflationInSeconds, true);
   }
 
-  public void deflate(float durationOfInflationInSeconds, float ambientPressure) {
-    this.currentVolume = this.currentVolume - durationOfInflationInSeconds * inflationRateSeaLevel * ambientPressure;
-    System.err.println("Deflate Volume " + currentVolume);
+  public void deflate(float durationOfInflationInSeconds) {
+    updateVolume(durationOfInflationInSeconds, false);
+  }
+
+  private void updateVolume(float durationOfInflationInSeconds, boolean isInflating) {
+    float volumeChange = durationOfInflationInSeconds * INFLATION_RATE_SEA_LEVEL * ambientPressureProvider.get();
+    if (isInflating) {
+      float updatedVolume = this.currentVolume + volumeChange;
+      this.currentVolume = Math.min(updatedVolume, MAX_VOLUME);
+    } else {
+      float updatedVolume = this.currentVolume - volumeChange;
+      this.currentVolume = Math.max(updatedVolume, MIN_VOLUME);
+    }
   }
 }
