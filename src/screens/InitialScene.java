@@ -66,6 +66,8 @@ public class InitialScene extends BasicGameState {
 	private float currentVerticalSpeed = 0.0f; // Current vertical speed of the diver
 	private float deltaTime = 0.0010f; // Assuming 3000 FPS, delta time is approximately 1/60 seconds
 	private float heightWaterAboveDiver = 0.0f; // Height of water above the diver
+	private float maxVerticalSpeed = 100.0f;
+	private float minVerticalSpeed = -100.0f;
 
 	// ID we return to class 'Application'
 	public static final int ID = 2;
@@ -384,6 +386,14 @@ public class InitialScene extends BasicGameState {
 
 		// Update the vertical speed based on buoyancy
 		currentVerticalSpeed += currentBuoyancy * deltaTime; // Adjust speed based on buoyancy
+
+		if (currentVerticalSpeed < minVerticalSpeed) {
+			currentVerticalSpeed = minVerticalSpeed;
+		}
+
+		if (currentVerticalSpeed > maxVerticalSpeed) {
+			currentVerticalSpeed = maxVerticalSpeed;
+		}
 
 		// Update the diver's position based on the current vertical speed
 		yDiver += - currentVerticalSpeed * deltaTime * 1; // Update position based on speed
