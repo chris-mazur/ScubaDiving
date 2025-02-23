@@ -19,24 +19,24 @@ public class SplashScreen extends BasicGameState {
 	// init-method for initializing all resources
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		logoImg = new Image("Assets\\SplashScreen\\leonardo-marcao-logo.png");
+		logoImg = new Image("Assets/SplashScreen/leonardo-marcao-logo.png");
 	}
 
 	@Override
 	// render-method for all the things happening on-screen
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics g) throws SlickException {
 		// initialize logo image in splash screen
-		g.fillRect(0, 0, 800, 600);
-		g.drawImage(logoImg, ((ScubaDiving.WIDTH / 2) - (logoImg.getWidth() / 2)),
-				((ScubaDiving.HEIGHT / 2) - (logoImg.getHeight() / 2)));
+		g.fillRect(0, 0, ScubaDiving.WIDTH, ScubaDiving.HEIGHT);
+		g.drawImage(logoImg, (((float) ScubaDiving.WIDTH / 2) - ((float) logoImg.getWidth() / 2)),
+				(((float) ScubaDiving.HEIGHT / 2) - ((float) logoImg.getHeight() / 2)));
 	}
 
 	// update-method with all the magic happening in it
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int arg2) throws SlickException {
 		try {
-			// sleep 3 seconds
-			Thread.sleep(3000);
+			// disable the splash screen for now
+			Thread.sleep(0);
 			// enter state ID = 1
 			sbg.enterState(1);
 		} catch (InterruptedException ex) {
