@@ -515,11 +515,11 @@ public class InitialScene extends BasicGameState {
     String arrow;
 
     if (speed > 0) {
-      color = Color.green;
-      arrow = "▲ ";
+      color = Color.blue;
+      arrow = "UP ";
     } else if (speed < 0) {
       color = Color.red;
-      arrow = "▼ ";
+      arrow = "DOWN ";
     } else {
       color = Color.gray;
       arrow = "";
