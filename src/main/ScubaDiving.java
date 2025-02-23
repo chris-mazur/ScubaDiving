@@ -20,7 +20,7 @@ public class ScubaDiving extends StateBasedGame {
 	// Application Properties
 	public static final int WIDTH = 800;
 	public static final int HEIGHT = 600;
-	public static final double VERSION = 1.0;
+	public static final double VERSION = 1.1;
 
 	// constructor
 	public ScubaDiving(String gamename) {

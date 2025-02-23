@@ -35,7 +35,8 @@ public class InitialScene extends BasicGameState {
   private float xBubble, yBubble;
   private float xBackground, yBackground;
   private static float speedDiver = 0.2f;
-  private static float speedBackground = 0.0f;
+  private static float speedBackground = 0.015f;
+  private static final float speedBuoyancy = 0.001f;
   private static final float BUOYANT_FORCE = 0.05f;
   private static final int ANIMATION_SPEED_DIVER = 150;
   private static final int ANIMATION_SPEED_ENEMY = 150;
@@ -60,7 +61,6 @@ public class InitialScene extends BasicGameState {
   private final AmbientPressureProvider ambientPressure = new AmbientPressureProvider();
   private final Diver diverPhysics = new Diver(ambientPressure, 8.0f);
   private final VerticalSpeed verticalSpeed = new VerticalSpeed(diverPhysics, ambientPressure);
-  private float deltaTime = 0.0010f; // Assuming 3000 FPS, delta time is approximately 1/60 seconds
 
   // ID we return to class 'Application'
   public static final int ID = 2;
@@ -122,7 +122,7 @@ public class InitialScene extends BasicGameState {
      */
     diverMovementLeft = new Animation(movementRight, ANIMATION_SPEED_DIVER);
     diverMovementRight = new Animation(movementLeft, ANIMATION_SPEED_DIVER);
-    float diverCoord[] = {80, 50, 185, 20, 290, 25, 280, 80, 110, 80};
+    float[] diverCoord = {80, 50, 185, 20, 290, 25, 280, 80, 110, 80};
     div = new Polygon(diverCoord);
 
     // set initial animation of diver
@@ -142,24 +142,26 @@ public class InitialScene extends BasicGameState {
     xBackground = 0;
     yBackground = 0;
 
+
+
     // configure x and y initial for garbage and enemies through random generation
-    xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yOil = ran.nextInt((int) (540));
+    xOil = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yOil = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
 
-    xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yBottle = ran.nextInt((int) (540));
+    xBottle = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yBottle = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
 
-    xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yFish = ran.nextInt((int) (540));
+    xFish = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yFish = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
 
-    xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yRadioActive = ran.nextInt((int) (540));
+    xRadioActive = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yRadioActive = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
 
-    xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yEnemy1 = ran.nextInt((int) (540));
+    xEnemy1 = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yEnemy1 = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
 
-    xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-    yEnemy2 = ran.nextInt((int) (540));
+    xEnemy2 = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+    yEnemy2 = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     // configuring particle system and emitter
     try {
       // bubble particle image
@@ -216,9 +218,8 @@ public class InitialScene extends BasicGameState {
     g.setColor(new Color(234, 32, 39));
     g.drawString(Integer.toString(diverHealth) + "%", 75, 52);
     g.setColor(Color.yellow);
-    g.drawString("Vertical speed: " + (int) (verticalSpeed.getCurrentVerticalSpeed()), 10, 72);
-    g.setColor(Color.yellow);
-    g.drawString("BCD volume: " + (int) (diverPhysics.getBuoyancyControlDevice().getCurrentVolume(ambientPressure.get())), 10, 92);
+    g.drawString("BCD volume: " + (int) (diverPhysics.getBuoyancyControlDevice().getCurrentVolume(ambientPressure.get())) + "L", 10, 72);
+    drawVerticalSpeed(g, 92, verticalSpeed);
     g.setColor(collider);
     g.draw(div);
     g.draw(enemyRect1);
@@ -226,6 +227,7 @@ public class InitialScene extends BasicGameState {
   }
 
   // update-method with all the magic happening in it
+
   @Override
   public void update(GameContainer gc, StateBasedGame sbg, int delta) throws SlickException {
     // location settings for diver, junk and enemy polygons
@@ -240,32 +242,32 @@ public class InitialScene extends BasicGameState {
     // check if diver collided with any of the objects in scene,
     // if yes, count point and are repositioned
     if (div.intersects(banRect)) {
-      xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yOil = ran.nextInt((int) (540));
+      xOil = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yOil = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
       points += 10;
       coin.play(1.0f, 0.5f);
       speedBackground += 0.009f;
       speedDiver += 0.009f;
     }
     if (div.intersects(radioActiveRect)) {
-      xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yRadioActive = ran.nextInt((int) (540));
+      xRadioActive = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yRadioActive = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
       points += 10;
       coin.play(1.0f, 0.5f);
       speedBackground += 0.01f;
       speedDiver += 0.009f;
     }
     if (div.intersects(fishRect)) {
-      xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yFish = ran.nextInt((int) (540));
+      xFish = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yFish = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
       points += 10;
       coin.play(1.0f, 0.5f);
       speedBackground += 0.01f;
       speedDiver += 0.009f;
     }
     if (div.intersects(bottleRect)) {
-      xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yBottle = ran.nextInt((int) (540));
+      xBottle = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yBottle = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
       points += 10;
       coin.play(1.0f, 0.5f);
       speedBackground += 0.01f;
@@ -273,26 +275,26 @@ public class InitialScene extends BasicGameState {
     }
 
     // check if litter has reached bottom, otherwise continue to go down and spin
-    if ((xDiver - xOil) < 600) {
+    if ((xDiver - xOil) < ScubaDiving.HEIGHT) {
       if (!(yOil >= 536)) {
         oil.rotate(+0.01f);
         yOil += 0.008f;
       }
     }
-    if ((xDiver - xRadioActive) < 600) {
-      if (!(yRadioActive >= 536)) {
+    if ((xDiver - xRadioActive) < ScubaDiving.HEIGHT) {
+      if (!(yRadioActive >= (ScubaDiving.HEIGHT - 64))) {
         radioActive.rotate(+0.01f);
         yRadioActive += 0.008f;
       }
     }
-    if ((xDiver - xBottle) < 600) {
-      if (!(yBottle >= 536)) {
+    if ((xDiver - xBottle) < ScubaDiving.HEIGHT) {
+      if (!(yBottle >= (ScubaDiving.HEIGHT - 64))) {
         bottle.rotate(+0.01f);
         yBottle += 0.008f;
       }
     }
-    if ((xDiver - xFish) < 600) {
-      if (!(yFish >= 536)) {
+    if ((xDiver - xFish) < ScubaDiving.HEIGHT) {
+      if (!(yFish >= (ScubaDiving.HEIGHT - 64))) {
         fish.rotate(+0.01f);
         yFish += 0.008f;
       }
@@ -302,26 +304,26 @@ public class InitialScene extends BasicGameState {
     // diver loses life and objects are repositioned
     if (xBottle < -32) {
       diverHealth -= 5;
-      xBottle = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yBottle = ran.nextInt((int) (540));
+      xBottle = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yBottle = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     } else if (xFish < -32) {
       diverHealth -= 5;
-      xFish = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yFish = ran.nextInt((int) (540));
+      xFish = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yFish = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     } else if ((xOil) < -32) {
       diverHealth -= 5;
-      xOil = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yOil = ran.nextInt((int) (540));
+      xOil = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yOil = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     } else if (xRadioActive < -32) {
       diverHealth -= 5;
-      xRadioActive = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yRadioActive = ran.nextInt((int) (540));
+      xRadioActive = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yRadioActive = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     } else if (xEnemy1 < -32) {
-      xEnemy1 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yEnemy1 = ran.nextInt((int) (540));
+      xEnemy1 = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yEnemy1 = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     } else if (xEnemy2 < -32) {
-      xEnemy2 = ran.nextInt((int) (xDiver + (800 - xDiver))) + 800;
-      yEnemy2 = ran.nextInt((int) (540));
+      xEnemy2 = ran.nextInt((int) (xDiver + (ScubaDiving.WIDTH - xDiver))) + ScubaDiving.WIDTH;
+      yEnemy2 = ran.nextInt((int) (ScubaDiving.HEIGHT - 60));
     }
 
     // setClearEachFrame
@@ -367,28 +369,29 @@ public class InitialScene extends BasicGameState {
     ambientPressure.update(yDiver);
 
     // Handle user input for BCD volume
+    float durationOfInflationInAdjustedSeconds = delta * speedBuoyancy;
     if (in.isKeyDown(Input.KEY_UP) || in.isKeyDown(Input.KEY_W)) {
-      diverPhysics.getBuoyancyControlDevice().inflate(deltaTime);
+      diverPhysics.getBuoyancyControlDevice().inflate(durationOfInflationInAdjustedSeconds);
     }
     if (in.isKeyDown(Input.KEY_DOWN) || in.isKeyDown(Input.KEY_S)) {
-      diverPhysics.getBuoyancyControlDevice().deflate(deltaTime);
+      diverPhysics.getBuoyancyControlDevice().deflate(durationOfInflationInAdjustedSeconds);
     }
 
     // Update the diver's position based on the current vertical speed
-    yDiver += -verticalSpeed.updateAndGetCurrentVerticalSpeed(deltaTime) * deltaTime;
+    yDiver += -verticalSpeed.updateAndGetCurrentVerticalSpeed(durationOfInflationInAdjustedSeconds) * durationOfInflationInAdjustedSeconds;
 
     // Ensure diver stays within bounds
     if (yDiver < 0) {
       yDiver = 0;
-    } else if (yDiver > 520) {
-      yDiver = 520;
+    } else if (yDiver > (ScubaDiving.HEIGHT - 80)) {
+      yDiver = (ScubaDiving.HEIGHT - 80);
     }
 
     // user input for left
     if (in.isKeyDown(Input.KEY_LEFT) || in.isKeyDown(Input.KEY_A)) {
       // move character in x and cancel buoyant force
       xDiver -= delta * speedDiver;
-      yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
+      yDiver += (float) (Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2));
       // move bubble particle with character
       xBubble = xDiver;
       // set visible false for particle system right and true for particle system
@@ -404,7 +407,7 @@ public class InitialScene extends BasicGameState {
     if (in.isKeyDown(Input.KEY_RIGHT) || in.isKeyDown(Input.KEY_D)) {
       // move character in x and cancel buoyant force
       xDiver += delta * speedDiver;
-      yDiver += Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2);
+      yDiver += (float) (Math.pow(((delta * BUOYANT_FORCE)), 2) + Math.pow(((delta * BUOYANT_FORCE)), 2));
       // block character in container
       if (xDiver >= 588) {
         xDiver -= delta * speedDiver;
@@ -436,7 +439,7 @@ public class InitialScene extends BasicGameState {
       gameOver.play(1f, 0.3f);
       try {
         gc.pause();
-        Thread.sleep(3000);
+        Thread.sleep(2000);
       } catch (InterruptedException ex) {
         Logger.getLogger(InitialScene.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -459,13 +462,12 @@ public class InitialScene extends BasicGameState {
       }
     }
   }
-
   // Returning 'ID' from class 'MainMenu'
+
   @Override
   public int getID() {
     return InitialScene.ID;
   }
-
   public int randomOnX() {
     Random generator = new Random();
     return generator.nextInt(5000);
@@ -505,5 +507,25 @@ public class InitialScene extends BasicGameState {
    */
   public void setUnderWaterLoop() {
     underWater.loop();
+  }
+
+  private void drawVerticalSpeed(Graphics g, int yCoordinate, VerticalSpeed verticalSpeed) {
+    int speed = (int) verticalSpeed.getCurrentVerticalSpeed();
+    Color color;
+    String arrow;
+
+    if (speed > 0) {
+      color = Color.green;
+      arrow = "▲ ";
+    } else if (speed < 0) {
+      color = Color.red;
+      arrow = "▼ ";
+    } else {
+      color = Color.gray;
+      arrow = "";
+    }
+
+    g.setColor(color);
+    g.drawString("Vertical speed: " + arrow + Math.abs(speed), 10, yCoordinate);
   }
 }

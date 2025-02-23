@@ -4,7 +4,7 @@ public class BuoyancyControlDevice {
 
   private static final float INFLATION_RATE_SEA_LEVEL = 10.0f; // 0.5-1.5 typically
   private static final float MIN_VOLUME = 0.0f;
-  private static final float MAX_VOLUME = 100.0f;
+  private static final float MAX_VOLUME = 80.0f;
 
   private final AmbientPressureProvider ambientPressureProvider;
   private float currentVolume;

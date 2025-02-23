@@ -1,4 +1,50 @@
-## Scuba Diving Game
+# Buoyancy Control in Scuba Diving Game
+
+One of the most essential skills in scuba diving is buoyancy control. Mastering this skill early on offers numerous benefits, including:
+
+- **Reduced Gas Consumption**: Enjoy longer dives by using less air.
+- **Enhanced Safety**: Avoid unplanned, rapid depth changes.
+- **Increased Enjoyment**: Spend more uninterrupted time admiring the underwater world.
+
+As a beginner diver, grasping the concepts of Buoyancy Control Devices (BCD) can be challenging. Key principles include:
+
+- **Deflate to Descend**
+- **Inflate to Slow Down**
+- **Inflate to Ascend**
+- **Deflate to Slow Down**
+
+These concepts can be overwhelming, especially when transitioning from theoretical knowledge gained from books or instructors to practical application during your first open water or pool sessions.
+
+## Project Overview
+
+The purpose of forking the ScubaDiver repository was to enhance the game by incorporating basic physics principles, allowing players to experience buoyancy at different depths.
+
+### Underlying Science
+
+The game is based on two fundamental principles: **Boyle’s Law** and **Archimedes’ Principle**. In short, ambient pressure affects the volume of air in the BCD, which in turn influences buoyancy.
+
+**Note**: The simulation is significantly simplified. For instance, lung capacity is not considered. The focus is solely on how the air in the BCD expands and contracts, affecting buoyancy. Additionally, the game does not account for the fact that to ascend slightly, divers should use their fins instead of inflating the BCD, which can waste air.
+
+### Assumptions
+
+For the buoyancy calculations, the following assumptions were made:
+
+- Diver weight: **80 kg**
+- Ballast weight: **5 kg**
+- BCD lift capacity: **0-15 kg**
+
+### Gameplay Adjustments
+
+To provide a more realistic experience, the game’s background speed has been slowed down, allowing players more time to ascend and descend. Players cannot simply use arrow keys to navigate instantly. However, the game still retains its fun elements, such as navigating around obstacles and collecting debris.
+
+Feel free to explore and enjoy the game while learning about buoyancy control in scuba diving!
+
+
+
+
+
+
+# Scuba Diving Game
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d113af0da84b4ab9b17b8ffc29c58ecf?branch=admin-javafx)](https://app.codacy.com/project/leonardomarcao/ScubaDiving/dashboard)
