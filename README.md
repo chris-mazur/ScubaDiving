@@ -1,6 +1,6 @@
 # Buoyancy Control in Scuba Diving Game
 
-### Changed ontrols
+### Changed controls
 
 - UP / A: inflate Buoyancy Control Device (BCD) (hold or click)
 - DOWN / S: deflate BCD (hold or click)
