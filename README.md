@@ -1,5 +1,14 @@
 # Buoyancy Control in Scuba Diving Game
 
+### Changed controls
+
+- UP / A: inflate Buoyancy Control Device (BCD) (hold or click)
+- DOWN / S: deflate BCD (hold or click)
+- RIGHT - unchanged, swim right
+- LEFT - unchanged, swim left
+
+### Intro
+
 One of the most essential skills in scuba diving is buoyancy control. Mastering this skill early on offers numerous benefits, including:
 
 - **Reduced Gas Consumption**: Enjoy longer dives by using less air.
@@ -21,7 +30,7 @@ The purpose of forking the ScubaDiver repository was to enhance the game by inco
 
 ### Underlying Science
 
-The game is based on two fundamental principles: **Boyle’s Law** and **Archimedes’ Principle**. In short, ambient pressure affects the volume of air in the BCD, which in turn influences buoyancy.
+The game is based on two fundamental principles: **Boyle's Law** and **Archimedes' Principle**. In short, ambient pressure affects the volume of air in the BCD, which in turn influences buoyancy.
 
 **Note**: The simulation is significantly simplified. For instance, lung capacity is not considered. The focus is solely on how the air in the BCD expands and contracts, affecting buoyancy. Additionally, the game does not account for the fact that to ascend slightly, divers should use their fins instead of inflating the BCD, which can waste air.
 
